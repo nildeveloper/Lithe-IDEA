@@ -2217,7 +2217,7 @@ private struct GitConflictPathRow: View {
                 } label: {
                     Text(path)
                         .font(.system(size: 11.5, design: .monospaced))
-                        .foregroundStyle(LitheTheme.primaryText)
+                        .foregroundColor(LitheTheme.primaryText)
                         .litheUnderline()
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -2234,13 +2234,13 @@ private struct GitConflictPathRow: View {
                         .font(.system(size: 10, weight: .semibold))
                 }
                 .buttonStyle(.borderless)
-                .foregroundStyle(LitheTheme.warning)
+                .foregroundColor(LitheTheme.warning)
                 .lithePointer()
                 .help("Discard this file and retry")
             } else {
                 Text(path)
                     .font(.system(size: 11.5, design: .monospaced))
-                    .foregroundStyle(LitheTheme.primaryText)
+                    .foregroundColor(LitheTheme.primaryText)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

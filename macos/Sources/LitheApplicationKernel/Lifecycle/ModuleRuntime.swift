@@ -131,7 +131,7 @@ public final class ModuleRuntime: ModuleCapabilityResolver, ModuleEventPublishin
             return instance
         }
 
-        for dependency in entry.factory.manifest.dependencies.sorted(by: dependencyOrder) {
+        for dependency in entry.factory.manifest.dependencies.sorted(by: { Self.dependencyOrder($0, $1) }) {
             switch dependency {
             case .module(let dependencyID):
                 _ = try await activate(dependencyID)
@@ -168,7 +168,7 @@ public final class ModuleRuntime: ModuleCapabilityResolver, ModuleEventPublishin
             entry.state = .active
             entries[id] = entry
             try publishCapabilities(of: instance, manifest: entry.factory.manifest)
-            let instanceContributions = instance.contributions().sorted(by: contributionOrder)
+            let instanceContributions = instance.contributions().sorted(by: { Self.contributionOrder($0, $1) })
             guard instanceContributions == entry.factory.contributions else {
                 throw ModuleRuntimeError.contributionCatalogMismatch(id)
             }
@@ -518,7 +518,7 @@ public final class ModuleRuntime: ModuleCapabilityResolver, ModuleEventPublishin
         visited.insert(id)
     }
 
-    private func dependencyOrder(_ lhs: ModuleDependency, _ rhs: ModuleDependency) -> Bool {
+    nonisolated private static func dependencyOrder(_ lhs: ModuleDependency, _ rhs: ModuleDependency) -> Bool {
         String(describing: lhs) < String(describing: rhs)
     }
 
@@ -540,7 +540,7 @@ public final class ModuleRuntime: ModuleCapabilityResolver, ModuleEventPublishin
         recoveryStore.setPendingActivations(pending.sorted())
     }
 
-    private func contributionOrder(_ lhs: ModuleContribution, _ rhs: ModuleContribution) -> Bool {
+    nonisolated private static func contributionOrder(_ lhs: ModuleContribution, _ rhs: ModuleContribution) -> Bool {
         (lhs.placement.rawValue, lhs.order, lhs.id)
             < (rhs.placement.rawValue, rhs.order, rhs.id)
     }

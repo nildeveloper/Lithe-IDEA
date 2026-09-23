@@ -1,5 +1,6 @@
 import Foundation
 @testable import LitheGitModule
+import LitheModuleAPI
 import Testing
 
 @Suite("IntelliJ Git graph parity")

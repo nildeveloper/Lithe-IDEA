@@ -1,6 +1,7 @@
 @testable import Lithe
 import LitheGitModule
 import LitheGitPerformanceSupport
+import LitheModuleAPI
 import AppKit
 import QuartzCore
 import Testing

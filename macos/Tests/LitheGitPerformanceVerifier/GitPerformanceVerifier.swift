@@ -1,6 +1,7 @@
 import Foundation
 import LitheGitModule
 import LitheGitPerformanceSupport
+import LitheModuleAPI
 
 @main
 struct GitPerformanceVerifier {

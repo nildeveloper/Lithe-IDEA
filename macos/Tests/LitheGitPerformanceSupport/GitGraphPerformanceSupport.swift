@@ -1,5 +1,6 @@
 import Foundation
 import LitheGitModule
+import LitheModuleAPI
 
 package enum SyntheticGitGraphFixture {
     private static let commitsPerBlock = 10

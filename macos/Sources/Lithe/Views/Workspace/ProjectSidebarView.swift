@@ -68,7 +68,7 @@ struct ProjectSidebarView: View {
                                 alignment: .topLeading
                             )
                         }
-                        .scrollContentBackground(.hidden)
+                        .litheScrollBackgroundHidden()
                         .litheScrollViewChrome(usesCompactScrollers: true)
                         .task(
                             id: ProjectTreeTaskID(

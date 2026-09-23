@@ -260,7 +260,7 @@ struct RedisWorkspaceView: View {
             specializedSectionTitle("String value", systemImage: "text.alignleft")
             TextEditor(text: $stringDraft)
                 .font(.system(size: 12, design: .monospaced))
-                .scrollContentBackground(.hidden)
+                .litheScrollBackgroundHidden()
                 .padding(7).frame(minHeight: 230)
                 .litheRoundedControlBackground(LitheTheme.inputBackground)
                 .overlay { RoundedRectangle(cornerRadius: LitheTheme.Metrics.controlCornerRadius).stroke(LitheTheme.panelBorder, lineWidth: 1) }
@@ -281,7 +281,7 @@ struct RedisWorkspaceView: View {
                 .font(.system(size: 9.5)).foregroundStyle(LitheTheme.secondaryText)
             TextEditor(text: $hashDraft)
                 .font(.system(size: 12, design: .monospaced))
-                .scrollContentBackground(.hidden)
+                .litheScrollBackgroundHidden()
                 .padding(7).frame(minHeight: 230)
                 .litheRoundedControlBackground(LitheTheme.inputBackground)
                 .overlay { RoundedRectangle(cornerRadius: LitheTheme.Metrics.controlCornerRadius).stroke(LitheTheme.panelBorder, lineWidth: 1) }
@@ -495,7 +495,8 @@ struct NacosWorkspaceView: View {
             .padding(12).litheWorkbenchSurface(LitheTheme.toolHeader)
             Rectangle().fill(LitheTheme.divider).frame(height: 1)
             TextEditor(text: $draftContent)
-                .font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden)
+                .font(.system(size: 12, design: .monospaced))
+                .litheScrollBackgroundHidden()
                 .padding(12).litheWorkbenchSurface(LitheTheme.editor)
             Rectangle().fill(LitheTheme.divider).frame(height: 1)
             HStack {

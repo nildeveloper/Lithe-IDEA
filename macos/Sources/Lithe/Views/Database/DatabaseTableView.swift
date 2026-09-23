@@ -1253,7 +1253,6 @@ private struct DatabaseReplaceSheet: View {
                 TextField("Find", text: $searchText)
                 TextField("Replace with", text: $replacementText)
             }
-            .formStyle(.grouped)
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }

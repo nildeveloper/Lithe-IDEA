@@ -972,7 +972,6 @@ private struct DatabaseSchemaEditorView: View {
                     }
                 }
             }
-            .formStyle(.grouped)
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }
@@ -1060,8 +1059,8 @@ private struct DatabaseDiagnosticsView: View {
             Rectangle().fill(LitheTheme.divider).frame(height: 1)
             List {
                 Section("SQL safety") {
-                    LabeledContent("Selected statement") { DatabaseLocalization.statementKind(analysis?.kind) }
-                    LabeledContent("Statements") { Text("\(analysis?.statementCount ?? 0)") }
+                    LabeledContentCompat("Selected statement") { DatabaseLocalization.statementKind(analysis?.kind) }
+                    LabeledContentCompat("Statements") { Text("\(analysis?.statementCount ?? 0)") }
                     if let warning = analysis?.warning {
                         Label {
                             DatabaseLocalization.text(warning)
@@ -1216,14 +1215,13 @@ private struct DatabaseBackupScheduleEditor: View {
         VStack(spacing: 0) {
             Text("Backup Schedule").font(.system(size: 15, weight: .semibold)).frame(maxWidth: .infinity, alignment: .leading).padding(16)
             Form {
-                LabeledContent("Connection") { Text(profile.name) }
+                LabeledContentCompat("Connection") { Text(profile.name) }
                 Toggle("Enable scheduled backups", isOn: $enabled)
                 Stepper(value: $intervalHours, in: 1...720) {
                     Text("Backup interval: \(intervalHours) hours")
                 }
                 Stepper("Keep \(retentionCount) recovery points", value: $retentionCount, in: 1...365)
             }
-            .formStyle(.grouped)
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }

@@ -197,97 +197,25 @@ enum EditorTabFlowPlanner {
     }
 }
 
-/// A compact, intrinsic-width wrapping layout for editor tabs. Unlike an
-/// adaptive LazyVGrid, every tab keeps its own measured width and wraps only
-/// when the next tab no longer fits on the current row.
-struct EditorTabFlowLayout: Layout {
+/// A fallback layout for editor tabs compatible with macOS 12 (does not require SwiftUI.Layout).
+struct EditorTabFlowLayout<Content: View>: View {
     static let minimumItemWidth: CGFloat = 154
 
     let horizontalSpacing: CGFloat
     let verticalSpacing: CGFloat
+    @ViewBuilder let content: Content
 
-    init(horizontalSpacing: CGFloat = 4, verticalSpacing: CGFloat = 2) {
+    init(horizontalSpacing: CGFloat = 4, verticalSpacing: CGFloat = 2, @ViewBuilder content: () -> Content) {
         self.horizontalSpacing = horizontalSpacing
         self.verticalSpacing = verticalSpacing
+        self.content = content()
     }
 
-    struct Cache {
-        var sizes: [CGSize]
-        var rows: [EditorTabFlowRow] = []
-        var availableWidth: CGFloat = -1
-    }
-
-    func makeCache(subviews: Subviews) -> Cache {
-        Cache(sizes: subviews.map { $0.sizeThatFits(.unspecified) })
-    }
-
-    func updateCache(_ cache: inout Cache, subviews: Subviews) {
-        cache.sizes = subviews.map { $0.sizeThatFits(.unspecified) }
-        cache.rows = []
-        cache.availableWidth = -1
-    }
-
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Cache
-    ) -> CGSize {
-        let width = proposal.width ?? naturalWidth(for: cache.sizes)
-        let rows = rows(for: width, cache: &cache)
-
-        return CGSize(
-            width: proposal.width ?? rows.map(\.width).max() ?? 0,
-            height: EditorTabFlowPlanner.height(
-                for: rows,
-                verticalSpacing: verticalSpacing
-            )
-        )
-    }
-
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Cache
-    ) {
-        let rows = rows(for: max(bounds.width, 1), cache: &cache)
-        var y = bounds.minY
-
-        for row in rows {
-            var x = bounds.minX
-            for item in row.items {
-                subviews[item.index].place(
-                    at: CGPoint(x: x, y: y),
-                    anchor: .topLeading,
-                    proposal: ProposedViewSize(
-                        width: item.width,
-                        height: row.height
-                    )
-                )
-                x += item.width + horizontalSpacing
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: horizontalSpacing) {
+                content
             }
-            y += row.height + verticalSpacing
         }
-    }
-
-    private func rows(for width: CGFloat, cache: inout Cache) -> [EditorTabFlowRow] {
-        guard cache.availableWidth != width || cache.rows.isEmpty else {
-            return cache.rows
-        }
-        cache.rows = EditorTabFlowPlanner.rows(
-            for: cache.sizes,
-            availableWidth: width,
-            horizontalSpacing: horizontalSpacing,
-            minimumItemWidth: Self.minimumItemWidth
-        )
-        cache.availableWidth = width
-        return cache.rows
-    }
-
-    private func naturalWidth(for sizes: [CGSize]) -> CGFloat {
-        guard !sizes.isEmpty else { return 0 }
-        let itemWidths = sizes.map { max($0.width, Self.minimumItemWidth) }
-        return itemWidths.reduce(0, +)
-            + CGFloat(max(0, itemWidths.count - 1)) * horizontalSpacing
     }
 }

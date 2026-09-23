@@ -1652,10 +1652,7 @@ struct WorkbenchView: View {
             editorBreadcrumbs
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            ViewThatFits(in: .horizontal) {
-                detailedStatusItems
-                compactStatusItems
-            }
+            detailedStatusItems
         }
         .font(LitheTheme.smallFont)
         .foregroundStyle(LitheTheme.secondaryText)

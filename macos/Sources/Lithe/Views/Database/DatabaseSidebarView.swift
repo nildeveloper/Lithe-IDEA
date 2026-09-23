@@ -348,11 +348,6 @@ struct DatabaseSidebarView: View {
                 .textCase(.uppercase)
                 .padding(.top, model.databaseFeature.folders.isEmpty ? 3 : 9)
                 .padding(.horizontal, 9)
-                .dropDestination(for: String.self) { items, _ in
-                    moveDroppedProfile(items, to: nil)
-                } isTargeted: { targeted in
-                    isUnfiledDropTarget = targeted
-                }
                 .background(isUnfiledDropTarget ? LitheTheme.accent.opacity(0.18) : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
             ForEach(rootProfiles) { profile in
@@ -455,11 +450,6 @@ struct DatabaseSidebarView: View {
                 }))
                 return items
             }
-            .dropDestination(for: String.self) { items, _ in
-                moveDroppedProfile(items, to: folder.id)
-            } isTargeted: { targeted in
-                targetedFolderID = targeted ? folder.id : nil
-            }
 
             if isExpanded {
                 ForEach(profiles) { profile in
@@ -531,7 +521,6 @@ struct DatabaseSidebarView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .litheRowHover(isActive: isSelected, activeBackground: profileColor(for: profile).opacity(0.12))
-            .draggable(profile.id.uuidString)
             .litheContextMenu { connectionContextMenu(profile) }
 
             if isExpanded, isSelected {
@@ -1625,8 +1614,6 @@ private struct DatabaseFolderEditor: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .formStyle(.grouped)
-            .scrollContentBackground(.hidden)
 
             Rectangle().fill(LitheTheme.divider).frame(height: 1)
             HStack(spacing: 8) {
@@ -1825,7 +1812,7 @@ struct DatabaseConnectionEditor: View {
                     Label("Advanced network", systemImage: "network")
                 }
             .padding(.top, 2)
-            }.formStyle(.grouped).scrollContentBackground(.hidden)
+            }
             if let error = model.databaseFeature.errorMessage { DatabaseLocalization.error(error).font(.system(size: 11)).foregroundStyle(LitheTheme.error).padding(.horizontal, 16) }
             Rectangle().fill(LitheTheme.divider).frame(height: 1)
             HStack(spacing: 8) {

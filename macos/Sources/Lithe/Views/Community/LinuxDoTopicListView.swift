@@ -78,7 +78,7 @@ struct LinuxDoTopicListView: View {
             .accessibilityHint("Opens the topic")
         }
         .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .litheScrollBackgroundHidden()
         .background(LitheTheme.sidebar)
     }
 

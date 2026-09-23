@@ -2055,14 +2055,16 @@ private struct JavaAttachView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Connect to Running JVM")
                 .font(.system(size: 14, weight: .semibold))
-            Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
-                GridRow {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
                     Text("Host")
+                        .frame(width: 40, alignment: .leading)
                     TextField("localhost", text: $host)
                         .textFieldStyle(.roundedBorder)
                 }
-                GridRow {
+                HStack(spacing: 10) {
                     Text("Port")
+                        .frame(width: 40, alignment: .leading)
                     TextField("5005", text: $port)
                         .textFieldStyle(.roundedBorder)
                 }
@@ -2128,16 +2130,16 @@ private struct JavaSteppingFiltersView: View {
                     .foregroundStyle(LitheTheme.secondaryText)
             }
 
-            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
-                GridRow {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 16) {
                     Toggle("Skip JDK and reflection code", isOn: $skipJDK)
                     Toggle("Skip third-party libraries", isOn: $skipLibraries)
                 }
-                GridRow {
+                HStack(spacing: 16) {
                     Toggle("Skip synthetic methods", isOn: $skipSynthetics)
                     Toggle("Skip static initializers", isOn: $skipStaticInitializers)
                 }
-                GridRow {
+                HStack(spacing: 16) {
                     Toggle("Skip constructors", isOn: $skipConstructors)
                     Toggle("Collapse matching stack frames", isOn: $hideFilteredStackFrames)
                 }
@@ -2153,7 +2155,7 @@ private struct JavaSteppingFiltersView: View {
                     .foregroundStyle(LitheTheme.secondaryText)
                 TextEditor(text: $classPatterns)
                     .font(.system(size: 11, design: .monospaced))
-                    .scrollContentBackground(.hidden)
+                    .litheScrollBackgroundHidden()
                     .padding(6)
                     .background(LitheTheme.sidebar)
                     .overlay {
@@ -2249,7 +2251,7 @@ private struct FunctionBreakpointEditorView: View {
                 Toggle("Enabled", isOn: $enabled)
                     .toggleStyle(.checkbox)
             }
-            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 functionEditorRow("Class or method", text: $name)
                 functionEditorRow("Condition", text: $condition)
                 functionEditorRow("Hit count", text: $hitCondition)
@@ -2278,10 +2280,11 @@ private struct FunctionBreakpointEditorView: View {
     }
 
     private func functionEditorRow(_ title: String, text: Binding<String>) -> some View {
-        GridRow {
+        HStack(spacing: 12) {
             Text(title)
                 .font(.system(size: 11))
                 .foregroundStyle(LitheTheme.secondaryText)
+                .frame(width: 100, alignment: .leading)
             TextField("", text: text)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(size: 11, design: .monospaced))
@@ -2400,7 +2403,7 @@ struct BreakpointEditorView: View {
                 Toggle("Enabled", isOn: $enabled)
                     .toggleStyle(.checkbox)
             }
-            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 editorRow(
                     "Condition",
                     text: $condition,
@@ -2448,10 +2451,11 @@ struct BreakpointEditorView: View {
         isSupported: Bool,
         help: String
     ) -> some View {
-        GridRow {
+        HStack(spacing: 12) {
             Text(title)
                 .font(.system(size: 11))
                 .foregroundStyle(LitheTheme.secondaryText)
+                .frame(width: 100, alignment: .leading)
             TextField("", text: text)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(size: 11, design: .monospaced))
@@ -2509,12 +2513,13 @@ private struct DataBreakpointEditorView: View {
                 Spacer()
                 Toggle("Enabled", isOn: $enabled).toggleStyle(.checkbox)
             }
-            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 if !breakpoint.accessTypes.isEmpty {
-                    GridRow {
+                    HStack(spacing: 12) {
                         Text("Access")
                             .font(.system(size: 11))
                             .foregroundStyle(LitheTheme.secondaryText)
+                            .frame(width: 100, alignment: .leading)
                         Picker("", selection: $accessType) {
                             ForEach(breakpoint.accessTypes, id: \.self) { Text($0).tag($0) }
                         }
@@ -2546,10 +2551,11 @@ private struct DataBreakpointEditorView: View {
     }
 
     private func dataEditorRow(_ title: String, text: Binding<String>) -> some View {
-        GridRow {
+        HStack(spacing: 12) {
             Text(title)
                 .font(.system(size: 11))
                 .foregroundStyle(LitheTheme.secondaryText)
+                .frame(width: 100, alignment: .leading)
             TextField("", text: text)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(size: 11, design: .monospaced))

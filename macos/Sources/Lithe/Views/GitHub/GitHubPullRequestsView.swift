@@ -705,7 +705,7 @@ struct GitHubPullRequestDetailView: View {
                         ZStack(alignment: .topLeading) {
                             TextEditor(text: $composerBody)
                                 .font(.system(size: 12))
-                                .scrollContentBackground(.hidden)
+                                .litheScrollBackgroundHidden()
                                 .padding(5)
                                 .frame(minHeight: 112)
                             if composerBody.isEmpty {
@@ -1438,25 +1438,17 @@ private struct GitHubCreatePullRequestWorkspaceView: View {
                 Rectangle().fill(LitheTheme.divider).frame(height: 1)
             }
 
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    Image(systemName: "arrow.triangle.branch")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(LitheTheme.secondaryText)
-                    branchPicker(label: "Base", selection: $base)
-                    Image(systemName: "arrow.left")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(LitheTheme.tertiaryText)
-                    branchPicker(label: "Compare", selection: $head)
-                    Spacer(minLength: 12)
-                    comparisonStatus
-                }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    branchPicker(label: "Base", selection: $base)
-                    branchPicker(label: "Compare", selection: $head)
-                    comparisonStatus
-                }
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.triangle.branch")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(LitheTheme.secondaryText)
+                branchPicker(label: "Base", selection: $base)
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(LitheTheme.tertiaryText)
+                branchPicker(label: "Compare", selection: $head)
+                Spacer(minLength: 12)
+                comparisonStatus
             }
 
             Text("Changes from the compare branch will be proposed for the base branch.")
@@ -1706,7 +1698,7 @@ private struct GitHubCreatePullRequestWorkspaceView: View {
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $descriptionText)
-                    .scrollContentBackground(.hidden)
+                    .litheScrollBackgroundHidden()
                     .font(.system(size: 12.5))
                     .focused($focusedField, equals: .description)
                     .padding(7)
@@ -2051,7 +2043,7 @@ private struct GitHubPullRequestForm: View {
                 formField("Description", required: false) {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $descriptionText)
-                            .scrollContentBackground(.hidden)
+                            .litheScrollBackgroundHidden()
                             .padding(5)
                             .frame(height: 170)
                         if descriptionText.isEmpty {

@@ -53,11 +53,11 @@ case "$TRIPLE" in
     arm64-apple-macosx) RUST_TARGET="aarch64-apple-darwin" ;;
     x86_64-apple-macosx) RUST_TARGET="x86_64-apple-darwin" ;;
 esac
-MACOSX_DEPLOYMENT_TARGET=13.0 \
+MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-12.0}" \
     CARGO_TARGET_DIR="$ROOT_DIR/rust/target/macos" \
     cargo build --manifest-path "$ROOT_DIR/rust/Cargo.toml" -p lithe-db-sidecar --target "$RUST_TARGET"
 cp "rust/target/macos/$RUST_TARGET/debug/lithe-db-sidecar" "$APP_DIR/Contents/Helpers/lithe-db-sidecar"
-MACOSX_DEPLOYMENT_TARGET=13.0 \
+MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-12.0}" \
     CARGO_TARGET_DIR="$ROOT_DIR/rust/target/macos" \
     cargo build --manifest-path "$ROOT_DIR/rust/Cargo.toml" -p lithe-db-mcp --target "$RUST_TARGET"
 cp "rust/target/macos/$RUST_TARGET/debug/lithe-db-mcp" "$APP_DIR/Contents/Helpers/lithe-db-mcp"

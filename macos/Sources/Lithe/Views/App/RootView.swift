@@ -23,7 +23,6 @@ extension EnvironmentValues {
 /// they are not tied to the primary window's lifetime alone.
 private struct ProjectWindowSceneBridge: View {
     @EnvironmentObject private var projectWindowLauncher: ProjectWindowLauncher
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Color.clear
@@ -34,13 +33,20 @@ private struct ProjectWindowSceneBridge: View {
 
     private func installCallbacks() {
         projectWindowLauncher.presentProjectWindow = { windowID in
-            openWindow(id: LitheWindowID.project, value: windowID)
+            if let window = NSApplication.shared.windows.first(where: {
+                $0.identifier == NSUserInterfaceItemIdentifier(windowID.uuidString)
+            }) {
+                window.makeKeyAndOrderFront(nil)
+            }
         }
         projectWindowLauncher.dismissProjectWindow = { windowID in
             ProjectWindowAppKitDismisser.dismiss(windowID: windowID)
         }
         projectWindowLauncher.presentPrimaryWindow = {
-            openWindow(id: LitheWindowID.welcome)
+            NSApp.activate(ignoringOtherApps: true)
+            if let window = NSApp.windows.first(where: { $0.canBecomeKey }) {
+                window.makeKeyAndOrderFront(nil)
+            }
         }
     }
 }
@@ -59,7 +65,6 @@ struct RootView: View {
     @EnvironmentObject private var projectSessions: ProjectSessionManager
     @EnvironmentObject private var projectWindowLauncher: ProjectWindowLauncher
     @EnvironmentObject private var updateChecker: UpdateChecker
-    @Environment(\.openWindow) private var openWindow
     @State private var didStartAutomaticUpdateCheck = false
 
     init(scope: ProjectWindowScope = .primary) {
@@ -186,8 +191,9 @@ private struct ProjectSessionContent: View {
 private struct ActiveSessionChrome: View {
     let scope: ProjectWindowScope
     @ObservedObject var session: AppModel
-    @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var projectSessions: ProjectSessionManager
+    @EnvironmentObject private var settings: AppSettings
+    @EnvironmentObject private var updateChecker: UpdateChecker
 
     var body: some View {
         Color.clear
@@ -203,7 +209,11 @@ private struct ActiveSessionChrome: View {
             )
             .onReceive(session.workbenchFeature.$isSettingsPresented) { isPresented in
                 guard isPresented else { return }
-                openWindow(id: LitheWindowID.settings)
+                SettingsWindowController.shared.show(
+                    model: session,
+                    settings: settings,
+                    updateChecker: updateChecker
+                )
             }
             .sheet(isPresented: Binding(
                 get: { session.workbenchFeature.isCloneRepositoryPresented },

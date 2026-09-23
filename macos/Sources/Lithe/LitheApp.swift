@@ -483,10 +483,6 @@ struct LitheApp: App {
                     }
                 }
         }
-        .defaultSize(
-            width: LitheWindowLayout.welcomeContentSize.width,
-            height: LitheWindowLayout.welcomeContentSize.height
-        )
         .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .newItem) {
@@ -522,7 +518,11 @@ struct LitheApp: App {
 
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {
-                    model.showSettings()
+                    SettingsWindowController.shared.show(
+                        model: model,
+                        settings: settings,
+                        updateChecker: updateChecker
+                    )
                 }
                 .litheKeyboardShortcut(model.keyboardShortcutFeature.primaryKeyPress(for: "settings"))
             }
@@ -648,45 +648,6 @@ struct LitheApp: App {
                 .disabled(model.workspaceURL == nil)
             }
         }
-
-        WindowGroup(id: LitheWindowID.project, for: UUID.self) { $windowID in
-            if let windowID {
-                let scopedSessions = projectSessions.sessions(in: .dedicated(windowID))
-                if scopedSessions.isEmpty {
-                    ProjectWindowMissingSessionView(windowID: windowID)
-                        .environmentObject(projectWindowLauncher)
-                } else {
-                    RootView(scope: .dedicated(windowID))
-                        .environmentObject(projectSessions.activeModel(in: .dedicated(windowID)))
-                        .environmentObject(projectSessions)
-                        .environmentObject(projectWindowLauncher)
-                        .environmentObject(settings)
-                        .environmentObject(memoryUsageMonitor)
-                        .environmentObject(frameRateMonitor)
-                        .environmentObject(updateChecker)
-                        .environment(\.locale, settings.language.locale)
-                        .id("\(windowID.uuidString)-\(settings.language)")
-                        .preferredColorScheme(settings.themePreference.preferredColorScheme)
-                }
-            }
-        }
-        .defaultSize(
-            width: LitheWindowLayout.workspaceContentSize.width,
-            height: LitheWindowLayout.workspaceContentSize.height
-        )
-        .windowStyle(.hiddenTitleBar)
-
-        Window(settingsWindowTitle(for: settings.language), id: LitheWindowID.settings) {
-            SettingsWindow(
-                model: model,
-                settings: settings
-            )
-            .environmentObject(settings)
-            .environmentObject(updateChecker)
-            .environment(\.locale, settings.language.locale)
-        }
-        .defaultSize(width: 1040, height: 720)
-        .windowResizability(.contentMinSize)
     }
 
     private static var startupProjectURL: URL? {
@@ -727,7 +688,55 @@ private struct ProjectWindowMissingSessionView: View {
     }
 }
 
-private struct SettingsWindow: View {
+@MainActor
+final class SettingsWindowController: NSObject, NSWindowDelegate {
+    static let shared = SettingsWindowController()
+
+    private var window: NSWindow?
+
+    func show(model: AppModel, settings: AppSettings, updateChecker: UpdateChecker) {
+        if let window = self.window {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let settingsView = SettingsWindow(
+            model: model,
+            settings: settings
+        )
+        .environmentObject(settings)
+        .environmentObject(updateChecker)
+        .environment(\.locale, settings.language.locale)
+
+        let hostingController = NSHostingController(rootView: settingsView)
+        let window = NSWindow(contentViewController: hostingController)
+        window.setContentSize(NSSize(width: 1040, height: 720))
+        window.minSize = NSSize(width: 800, height: 500)
+        window.title = settingsWindowTitle(for: settings.language)
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .visible
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        window.center()
+
+        self.window = window
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        self.window = nil
+    }
+
+    func close() {
+        window?.close()
+        self.window = nil
+    }
+}
+
+fileprivate struct SettingsWindow: View {
     @ObservedObject var model: AppModel
     @ObservedObject var settings: AppSettings
     @StateObject private var windowReference = SettingsWindowReference()

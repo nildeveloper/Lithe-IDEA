@@ -24,8 +24,8 @@ if [[ "$CONFIGURATION" != "debug" && "$CONFIGURATION" != "release" ]]; then
     exit 2
 fi
 case "$TRIPLE" in
-    arm64-apple-macosx) TARGET="arm64-apple-macosx13.0" ;;
-    x86_64-apple-macosx) TARGET="x86_64-apple-macosx13.0" ;;
+    arm64-apple-macosx) TARGET="arm64-apple-macosx${MACOSX_DEPLOYMENT_TARGET:-12.0}" ;;
+    x86_64-apple-macosx) TARGET="x86_64-apple-macosx${MACOSX_DEPLOYMENT_TARGET:-12.0}" ;;
     *) print -u2 -- "Unsupported macOS Swift triple: $TRIPLE"; exit 2 ;;
 esac
 

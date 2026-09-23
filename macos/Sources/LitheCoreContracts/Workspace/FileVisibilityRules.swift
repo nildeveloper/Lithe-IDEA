@@ -40,15 +40,7 @@ package struct FileVisibilityRules: Hashable, Sendable {
         let components = relativePath.split(separator: "/").map(String.init)
         guard let lastComponent = components.last else { return false }
 
-        let directoryComponents: [String]
-        switch isDirectory {
-        case true:
-            directoryComponents = components
-        case false:
-            directoryComponents = Array(components.dropLast())
-        case nil:
-            directoryComponents = components
-        }
+        let directoryComponents = isDirectory == false ? Array(components.dropLast()) : components
         if directoryComponents.contains(where: isHiddenDirectoryName) {
             return true
         }

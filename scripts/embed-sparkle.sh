@@ -2,8 +2,11 @@
 set -euo pipefail
 ROOT_DIR="${0:A:h:h}"
 APP_DIR="${1:?Usage: embed-sparkle.sh app-directory}"
-frameworks=("$ROOT_DIR"/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-*/Sparkle.framework(N))
-if [[ ${#frameworks} != 1 ]]; then
+frameworks=(
+    "$ROOT_DIR"/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-*/Sparkle.framework(N)
+    "$ROOT_DIR"/.build/*/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-*/Sparkle.framework(N)
+)
+if [[ ${#frameworks} -lt 1 ]]; then
     print -u2 -- "Resolve the pinned Sparkle Swift package before packaging."
     exit 1
 fi

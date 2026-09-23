@@ -339,7 +339,7 @@ struct RustCoreBridge: Sendable, IncrementalLanguageServerRuntimeCore {
         func makeProject(workspaceRootURL: URL) -> MavenProject {
             let rootURL = relativePath == "."
                 ? workspaceRootURL
-                : workspaceRootURL.appending(path: relativePath, directoryHint: .isDirectory)
+                : workspaceRootURL.appendingPathComponent(relativePath, isDirectory: true)
             return MavenProject(
                 rootURL: rootURL,
                 pomURL: rootURL.appendingPathComponent("pom.xml"),

@@ -172,19 +172,34 @@ private struct MonacoWorkbenchSurface: NSViewRepresentable {
     }
 }
 
-final class MonacoWorkbenchAssets: NSObject, WKURLSchemeHandler {
+final class MonacoWorkbenchAssets: NSObject, WKURLSchemeHandler, @unchecked Sendable {
     let root: URL
+    private let queue = DispatchQueue(label: "lithe.monaco.assets", qos: .userInitiated)
     init(root: URL) { self.root = root.standardizedFileURL.resolvingSymlinksInPath() }
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
-        do {
-            guard let url = task.request.url, url.scheme == "lithe-editor", url.host == "app" else { throw CocoaError(.fileReadNoPermission) }
-            let file = root.appendingPathComponent(url.path).standardizedFileURL.resolvingSymlinksInPath()
-            guard file.path.hasPrefix(root.path + "/") else { throw CocoaError(.fileReadNoPermission) }
-            let data = try Data(contentsOf: file)
-            let types = ["html": "text/html", "js": "application/javascript", "css": "text/css", "ttf": "font/ttf"]
-            task.didReceive(HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": types[file.pathExtension] ?? "application/octet-stream"])!)
-            task.didReceive(data); task.didFinish()
-        } catch { task.didFailWithError(error) }
+        guard let url = task.request.url, url.scheme == "lithe-editor", url.host == "app" else {
+            task.didFailWithError(CocoaError(.fileReadNoPermission))
+            return
+        }
+        queue.async { [root] in
+            do {
+                let file = root.appendingPathComponent(url.path).standardizedFileURL.resolvingSymlinksInPath()
+                guard file.path.hasPrefix(root.path + "/") else { throw CocoaError(.fileReadNoPermission) }
+                let data = try Data(contentsOf: file, options: .mappedIfSafe)
+                let types = ["html": "text/html", "js": "application/javascript", "css": "text/css", "ttf": "font/ttf"]
+                let response = URLResponse(
+                    url: url,
+                    mimeType: types[file.pathExtension] ?? "application/octet-stream",
+                    expectedContentLength: data.count,
+                    textEncodingName: nil
+                )
+                task.didReceive(response)
+                task.didReceive(data)
+                task.didFinish()
+            } catch {
+                task.didFailWithError(error)
+            }
+        }
     }
     func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {}
 }

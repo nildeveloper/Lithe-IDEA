@@ -77,8 +77,8 @@ struct FindBarView: View {
                 TextField("Find in file", text: queryBinding)
                     .textFieldStyle(.plain)
                     .focused($findFocused)
-                    .onContinuousHover { phase in
-                        if case .active = phase { NSCursor.iBeam.set() }
+                    .onHover { isHovering in
+                        if isHovering { NSCursor.iBeam.set() }
                         else { NSCursor.arrow.set() }
                     }
                     .macReturnKeyHandler(isEnabled: findFocused) { isShiftPressed in
@@ -134,8 +134,8 @@ struct FindBarView: View {
                 TextField("Replace with", text: replaceBinding)
                     .textFieldStyle(.plain)
                     .focused($replaceFocused)
-                    .onContinuousHover { phase in
-                        if case .active = phase { NSCursor.iBeam.set() }
+                    .onHover { isHovering in
+                        if isHovering { NSCursor.iBeam.set() }
                         else { NSCursor.arrow.set() }
                     }
                     .macReturnKeyHandler(isEnabled: replaceFocused) { isShiftPressed in
@@ -247,13 +247,10 @@ private struct FindBarButtonStyle: ButtonStyle {
                 }
             }
             .contentShape(Rectangle())
-            .onContinuousHover { phase in
-                switch phase {
-                case .active:
-                    isHovering = true
+            .onHover { hovering in
+                isHovering = hovering
+                if hovering {
                     NSCursor.arrow.set()
-                case .ended:
-                    isHovering = false
                 }
             }
     }

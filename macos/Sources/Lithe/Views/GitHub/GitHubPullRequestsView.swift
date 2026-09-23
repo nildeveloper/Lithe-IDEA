@@ -609,7 +609,7 @@ struct GitHubPullRequestDetailView: View {
                     if request.body.isEmpty {
                         Text("No description provided.")
                             .foregroundStyle(LitheTheme.tertiaryText)
-                            .italic()
+                            .litheItalic()
                     } else {
                         Text(request.body)
                             .textSelection(.enabled)

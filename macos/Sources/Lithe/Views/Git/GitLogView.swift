@@ -2123,9 +2123,14 @@ private struct GitTagNameDialog: View {
                 .onSubmit(submit)
 
             VStack(alignment: .leading, spacing: 3) {
-                TextField("Message (optional)", text: $message, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(1...4)
+                if #available(macOS 13.0, *) {
+                    TextField("Message (optional)", text: $message, axis: .vertical)
+                        .textFieldStyle(.roundedBorder)
+                        .lineLimit(1...4)
+                } else {
+                    TextField("Message (optional)", text: $message)
+                        .textFieldStyle(.roundedBorder)
+                }
                 Text("A message creates an annotated tag.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(LitheTheme.secondaryText)
@@ -2213,7 +2218,7 @@ private struct GitConflictPathRow: View {
                     Text(path)
                         .font(.system(size: 11.5, design: .monospaced))
                         .foregroundStyle(LitheTheme.primaryText)
-                        .underline()
+                        .litheUnderline()
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

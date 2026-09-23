@@ -507,13 +507,6 @@ enum LitheIcons {
         return image
     }
 
-    /// gutter、OutputTextView 等 AppKit 侧使用。通过 ImageRenderer 复用
-    /// SwiftUI 的几何定义，避免把每个图标画两遍。
-    @MainActor
-    static func nsImage(_ kind: LitheIconKind, size: CGFloat) -> NSImage? {
-        render(key: "\(kind):\(size)", content: LitheIcon(kind: kind, size: size))
-    }
-
     /// Renders the four IDEA Java gutter variants from relationship and direction.
     @MainActor
     static func implementationMarkerImage(
@@ -548,16 +541,6 @@ enum LitheIcons {
 
     static func appLogo(size: CGFloat = 42) -> LitheLogo {
         LitheLogo(size: size)
-    }
-
-    @MainActor
-    private static func render(key: String, content: some View) -> NSImage? {
-        if let cached = ImageCache.shared.storage[key] { return cached }
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
-        guard let image = renderer.nsImage else { return nil }
-        ImageCache.shared.storage[key] = image
-        return image
     }
 }
 

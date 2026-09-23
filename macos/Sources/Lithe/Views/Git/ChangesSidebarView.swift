@@ -659,7 +659,7 @@ struct ChangesSidebarView: View {
                     Text(changeDisplayName(change))
                         .font(.system(size: 12.5))
                         .foregroundStyle(fileNameColor(change))
-                        .strikethrough(change.kind == .deleted, color: statusColor(change))
+                        .litheStrikethrough(change.kind == .deleted, color: statusColor(change))
                         .lineLimit(1)
                         .layoutPriority(1)
                     let parent = parentPathText(change)

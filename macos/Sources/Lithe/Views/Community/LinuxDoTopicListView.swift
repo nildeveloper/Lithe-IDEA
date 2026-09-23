@@ -73,7 +73,7 @@ struct LinuxDoTopicListView: View {
             .buttonStyle(.plain)
             .lithePointer()
             .listRowInsets(EdgeInsets(top: 3, leading: 6, bottom: 3, trailing: 6))
-            .listRowSeparator(.hidden)
+            .litheListRowSeparatorHidden()
             .listRowBackground(Color.clear)
             .accessibilityHint("Opens the topic")
         }

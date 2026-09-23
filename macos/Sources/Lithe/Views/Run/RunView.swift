@@ -1060,7 +1060,7 @@ struct RunView: View {
                                 openURL(serviceURL)
                             } label: {
                                 Text("localhost:" + portText)
-                                    .underline()
+                                    .litheUnderline()
                             }
                             .buttonStyle(.plain)
                             .foregroundStyle(LitheTheme.accent)

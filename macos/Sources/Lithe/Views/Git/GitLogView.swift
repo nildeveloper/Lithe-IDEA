@@ -1190,7 +1190,7 @@ struct GitLogView: View {
                 VStack(alignment: .leading, spacing: 9) {
                     Text(commit.subject)
                         .font(.system(size: 13.5, weight: .semibold))
-                        .foregroundStyle(LitheTheme.primaryText)
+                        .foregroundColor(LitheTheme.primaryText)
                         .lineLimit(2)
                     Text("\(commit.shortHash)  \(commit.authorName) <\(commit.authorEmail)>")
                         .font(GitVisual.meta)

@@ -35,6 +35,12 @@ jobs:
         with:
           bun-version-file: frontend/editor/package.json
 
+      - name: Compile Lithe for macOS 12
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "12.0"
+          LITHE_ARCH: "arm64"
+        run: ./scripts/build-macos.sh --configuration release --triple arm64-apple-macosx
+
       - name: Build and package Lithe for macOS 12
         env:
           MACOSX_DEPLOYMENT_TARGET: "12.0"

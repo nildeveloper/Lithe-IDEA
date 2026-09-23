@@ -658,7 +658,7 @@ struct ChangesSidebarView: View {
                         .help(LocalizedStringKey(change.kind.title))
                     Text(changeDisplayName(change))
                         .font(.system(size: 12.5))
-                        .foregroundStyle(fileNameColor(change))
+                        .foregroundColor(fileNameColor(change))
                         .litheStrikethrough(change.kind == .deleted, color: statusColor(change))
                         .lineLimit(1)
                         .layoutPriority(1)

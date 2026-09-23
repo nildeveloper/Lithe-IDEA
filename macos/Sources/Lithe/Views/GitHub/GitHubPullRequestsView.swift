@@ -1438,17 +1438,13 @@ private struct GitHubCreatePullRequestWorkspaceView: View {
                 Rectangle().fill(LitheTheme.divider).frame(height: 1)
             }
 
-            HStack(spacing: 10) {
-                Image(systemName: "arrow.triangle.branch")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(LitheTheme.secondaryText)
-                branchPicker(label: "Base", selection: $base)
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(LitheTheme.tertiaryText)
-                branchPicker(label: "Compare", selection: $head)
-                Spacer(minLength: 12)
-                comparisonStatus
+            if #available(macOS 13.0, *) {
+                ViewThatFits(in: .horizontal) {
+                    comparisonWideRow
+                    comparisonNarrowRow
+                }
+            } else {
+                comparisonNarrowRow
             }
 
             Text("Changes from the compare branch will be proposed for the base branch.")
@@ -1459,6 +1455,29 @@ private struct GitHubCreatePullRequestWorkspaceView: View {
         .background(LitheTheme.toolHeader)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(LitheTheme.inputBorder))
+    }
+
+    private var comparisonWideRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.triangle.branch")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(LitheTheme.secondaryText)
+            branchPicker(label: "Base", selection: $base)
+            Image(systemName: "arrow.left")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(LitheTheme.tertiaryText)
+            branchPicker(label: "Compare", selection: $head)
+            Spacer(minLength: 12)
+            comparisonStatus
+        }
+    }
+
+    private var comparisonNarrowRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            branchPicker(label: "Base", selection: $base)
+            branchPicker(label: "Compare", selection: $head)
+            comparisonStatus
+        }
     }
 
     private var branchPublicationPanel: some View {

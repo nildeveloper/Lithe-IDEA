@@ -1652,7 +1652,14 @@ struct WorkbenchView: View {
             editorBreadcrumbs
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            detailedStatusItems
+            if #available(macOS 13.0, *) {
+                ViewThatFits(in: .horizontal) {
+                    detailedStatusItems
+                    compactStatusItems
+                }
+            } else {
+                compactStatusItems
+            }
         }
         .font(LitheTheme.smallFont)
         .foregroundStyle(LitheTheme.secondaryText)

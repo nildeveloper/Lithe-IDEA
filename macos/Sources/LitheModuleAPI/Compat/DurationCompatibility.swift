@@ -11,10 +11,6 @@ public struct Duration: Sendable, Equatable, Comparable, Hashable, CustomStringC
         Duration(nanoseconds: 0)
     }
 
-    public static func nanoseconds(_ ns: UInt64) -> Duration {
-        Duration(nanoseconds: ns)
-    }
-
     public static func nanoseconds(_ ns: Int64) -> Duration {
         Duration(nanoseconds: UInt64(max(0, ns)))
     }
@@ -85,27 +81,29 @@ public struct Duration: Sendable, Equatable, Comparable, Hashable, CustomStringC
 
 public struct ContinuousClock: Sendable {
     public struct Instant: Sendable, Comparable, Equatable, Hashable {
-        public let date: Date
+        // Keep deadlines independent of wall-clock changes on macOS 12.
+        public let uptimeNanoseconds: UInt64
 
-        public init(date: Date = Date()) {
-            self.date = date
+        public init(uptimeNanoseconds: UInt64 = DispatchTime.now().uptimeNanoseconds) {
+            self.uptimeNanoseconds = uptimeNanoseconds
         }
 
         public static var now: Instant {
-            Instant(date: Date())
+            Instant()
         }
 
         public static func < (lhs: Instant, rhs: Instant) -> Bool {
-            lhs.date < rhs.date
+            lhs.uptimeNanoseconds < rhs.uptimeNanoseconds
         }
 
         public func advanced(by duration: Duration) -> Instant {
-            Instant(date: date.addingTimeInterval(Double(duration.nanoseconds) / 1_000_000_000))
+            let (result, overflow) = uptimeNanoseconds.addingReportingOverflow(duration.nanoseconds)
+            return Instant(uptimeNanoseconds: overflow ? .max : result)
         }
 
         public func duration(to other: Instant) -> Duration {
-            let interval = other.date.timeIntervalSince(date)
-            return Duration(nanoseconds: UInt64(max(0, interval * 1_000_000_000)))
+            Duration(nanoseconds: other.uptimeNanoseconds > uptimeNanoseconds
+                ? other.uptimeNanoseconds - uptimeNanoseconds : 0)
         }
 
         public static func + (lhs: Instant, rhs: Duration) -> Instant {
@@ -113,7 +111,8 @@ public struct ContinuousClock: Sendable {
         }
 
         public static func - (lhs: Instant, rhs: Duration) -> Instant {
-            Instant(date: lhs.date.addingTimeInterval(-Double(rhs.nanoseconds) / 1_000_000_000))
+            Instant(uptimeNanoseconds: lhs.uptimeNanoseconds > rhs.nanoseconds
+                ? lhs.uptimeNanoseconds - rhs.nanoseconds : 0)
         }
 
         public static func - (lhs: Instant, rhs: Instant) -> Duration {
@@ -132,9 +131,9 @@ public struct ContinuousClock: Sendable {
     }
 
     public func sleep(until deadline: Instant) async throws {
-        let remaining = deadline.date.timeIntervalSince(Date())
-        if remaining > 0 {
-            try await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+        let now = DispatchTime.now().uptimeNanoseconds
+        if deadline.uptimeNanoseconds > now {
+            try await Task.sleep(nanoseconds: deadline.uptimeNanoseconds - now)
         }
     }
 

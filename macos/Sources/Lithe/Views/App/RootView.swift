@@ -23,6 +23,11 @@ extension EnvironmentValues {
 /// they are not tied to the primary window's lifetime alone.
 private struct ProjectWindowSceneBridge: View {
     @EnvironmentObject private var projectWindowLauncher: ProjectWindowLauncher
+    @EnvironmentObject private var projectSessions: ProjectSessionManager
+    @EnvironmentObject private var settings: AppSettings
+    @EnvironmentObject private var memoryUsageMonitor: MemoryUsageMonitor
+    @EnvironmentObject private var frameRateMonitor: FrameRateMonitor
+    @EnvironmentObject private var updateChecker: UpdateChecker
 
     var body: some View {
         Color.clear
@@ -33,30 +38,86 @@ private struct ProjectWindowSceneBridge: View {
 
     private func installCallbacks() {
         projectWindowLauncher.presentProjectWindow = { windowID in
-            if let window = NSApplication.shared.windows.first(where: {
-                $0.identifier == NSUserInterfaceItemIdentifier(windowID.uuidString)
-            }) {
-                window.makeKeyAndOrderFront(nil)
-            }
+            ProjectWindowAppKitDismisser.present(
+                windowID: windowID,
+                rootView: rootView(for: .dedicated(windowID))
+            )
         }
         projectWindowLauncher.dismissProjectWindow = { windowID in
             ProjectWindowAppKitDismisser.dismiss(windowID: windowID)
         }
         projectWindowLauncher.presentPrimaryWindow = {
-            NSApp.activate(ignoringOtherApps: true)
-            if let window = NSApp.windows.first(where: { $0.canBecomeKey }) {
-                window.makeKeyAndOrderFront(nil)
-            }
+            ProjectWindowAppKitDismisser.presentPrimary(rootView: rootView(for: .primary))
         }
+    }
+
+    private func rootView(for scope: ProjectWindowScope) -> some View {
+        RootView(scope: scope)
+            .environmentObject(projectSessions.activeModel(in: scope))
+            .environmentObject(projectSessions)
+            .environmentObject(projectWindowLauncher)
+            .environmentObject(settings)
+            .environmentObject(memoryUsageMonitor)
+            .environmentObject(frameRateMonitor)
+            .environmentObject(updateChecker)
+            .environment(\.locale, settings.language.locale)
+            .id("\(scope)-\(settings.language)")
+            .preferredColorScheme(settings.themePreference.preferredColorScheme)
     }
 }
 
+@MainActor
 enum ProjectWindowAppKitDismisser {
-    static func dismiss(windowID: UUID) {
-        let identifier = NSUserInterfaceItemIdentifier(windowID.uuidString)
-        for window in NSApplication.shared.windows where window.identifier == identifier {
-            window.close()
+    private static var windows: [UUID: NSWindow] = [:]
+    private static var primaryWindow: NSWindow?
+
+    static func present<Content: View>(windowID: UUID, rootView: Content) {
+        let window: NSWindow
+        if let existing = windows[windowID] {
+            window = existing
+        } else {
+            window = NSWindow(contentViewController: NSHostingController(rootView: rootView))
+            window.identifier = NSUserInterfaceItemIdentifier(windowID.uuidString)
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+            window.setContentSize(LitheWindowLayout.workspaceContentSize)
+            window.isReleasedWhenClosed = false
+            window.center()
+            windows[windowID] = window
         }
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    static func dismiss(windowID: UUID) {
+        windows[windowID]?.close()
+    }
+
+    static func forget(_ window: NSWindow) {
+        if primaryWindow === window { primaryWindow = nil }
+        if let windowID = window.identifier.flatMap({ UUID(uuidString: $0.rawValue) }),
+           windows[windowID] === window {
+            windows[windowID] = nil
+        }
+    }
+
+    static func presentPrimary<Content: View>(rootView: Content) {
+        let identifier = NSUserInterfaceItemIdentifier(LitheWindowID.welcome)
+        let window: NSWindow
+        if let existing = primaryWindow ?? NSApp.windows.first(where: {
+            $0.identifier == identifier && $0.isVisible
+        }) {
+            window = existing
+        } else {
+            window = NSWindow(contentViewController: NSHostingController(rootView: rootView))
+            window.identifier = identifier
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+            window.setContentSize(LitheWindowLayout.welcomeContentSize)
+            window.isReleasedWhenClosed = false
+            window.center()
+            primaryWindow = window
+        }
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
@@ -450,6 +511,8 @@ final class LitheWindowCoordinator: NSObject, NSWindowDelegate {
         }
         if case .dedicated(let windowID) = projectSessions.windowScope {
             window.identifier = NSUserInterfaceItemIdentifier(windowID.uuidString)
+        } else {
+            window.identifier = NSUserInterfaceItemIdentifier(LitheWindowID.welcome)
         }
         apply(layout, title: title, to: window)
         if window.isKeyWindow {
@@ -481,6 +544,11 @@ final class LitheWindowCoordinator: NSObject, NSWindowDelegate {
     func windowDidBecomeKey(_ notification: Notification) {
         guard notification.object as? NSWindow === window else { return }
         projectSessions.noteWindowBecameKey()
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let closingWindow = notification.object as? NSWindow else { return }
+        ProjectWindowAppKitDismisser.forget(closingWindow)
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {

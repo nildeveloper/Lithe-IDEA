@@ -22,11 +22,15 @@ public struct LabeledContentCompat<Content: View>: View {
     }
 
     public var body: some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(Color.secondary)
-            Spacer()
-            content
+        if #available(macOS 13.0, *) {
+            LabeledContent(title) { content }
+        } else {
+            HStack {
+                Text(title)
+                    .foregroundStyle(Color.secondary)
+                Spacer()
+                content
+            }
         }
     }
 }

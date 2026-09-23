@@ -240,7 +240,7 @@ struct EditorAreaView: View {
     }
 
     private var multipleRowsEditorTabLayout: some View {
-        EditorTabFlowLayout(horizontalSpacing: 4, verticalSpacing: 2) {
+        EditorTabFlowContainer(horizontalSpacing: 4, verticalSpacing: 2) {
             editorTabItems
         }
         .padding(.horizontal, 2)
@@ -295,7 +295,7 @@ struct EditorAreaView: View {
         return ZStack(alignment: .leading) {
             if settings.editorTabLayoutMode == .multipleRows {
                 editorTabContent(document, dropSide: dropSide)
-                    .frame(minWidth: EditorTabFlowLayout.minimumItemWidth, alignment: .leading)
+                    .frame(minWidth: EditorTabFlowPlanner.minimumItemWidth, alignment: .leading)
             } else {
                 editorTabContent(document, dropSide: dropSide)
             }

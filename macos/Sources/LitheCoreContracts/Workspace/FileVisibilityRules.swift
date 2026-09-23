@@ -46,7 +46,7 @@ package struct FileVisibilityRules: Hashable, Sendable {
             directoryComponents = components
         case false:
             directoryComponents = Array(components.dropLast())
-        default:
+        case nil:
             directoryComponents = components
         }
         if directoryComponents.contains(where: isHiddenDirectoryName) {
